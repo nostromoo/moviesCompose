@@ -39,6 +39,7 @@ fun MoviesNavHost(
             )
         ) {
             BackHandler(true) {
+                navController.popBackStack()
             }
             val movie = it.arguments?.getParcelable<MovieEntity>("movie")
 
