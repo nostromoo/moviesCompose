@@ -79,7 +79,8 @@ data class Movie(
 fun Movie.toEntityList(): MovieEntity {
     return MovieEntity(
         name.label,
-        image.firstOrNull()?.label,
+        image.maxBy { it.attributes.height.toInt() }.label,
+        image.maxBy { it.attributes.height.toInt() }.attributes.height.toInt(),
         link.firstOrNull { it.attributes.assetType == "preview" }?.attributes?.href,
         summary.label,
         releaseDate.attributes.label,

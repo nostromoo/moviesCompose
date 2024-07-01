@@ -2,12 +2,12 @@ package com.example.moviescompose.movieslist
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import coil.size.Size.Companion.ORIGINAL
 import com.example.moviescompose.R
 import com.example.moviescompose.data.repository.MoviesState
 import com.example.moviescompose.domain.model.MovieEntity
@@ -34,8 +35,10 @@ fun MoviesScreen(onMovieClick: (MovieEntity) -> Unit) {
 
     when (moviesState) {
         is MoviesState.SUCCESS -> {
-            LazyColumn {
-                itemsIndexed((moviesState as MoviesState.SUCCESS).movieEntities) { _, movie ->
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2)
+            ) {
+                items((moviesState as MoviesState.SUCCESS).movieEntities) { movie ->
                     MovieCard(movie, onMovieClick)
                 }
             }
@@ -52,14 +55,13 @@ fun MovieCard(movieEntity: MovieEntity, onMovieClick: (MovieEntity) -> Unit) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(movieEntity.cover)
-                .crossfade(true)
+                .size(ORIGINAL)
                 .build(),
             placeholder = painterResource(R.drawable.popcorn),
             contentDescription = movieEntity.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .aspectRatio(1.5f, true)
-                .height(300.dp)
+                .wrapContentSize()
                 .fillMaxWidth(),
         )
         Text(

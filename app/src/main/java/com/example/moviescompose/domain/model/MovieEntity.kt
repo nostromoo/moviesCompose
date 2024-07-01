@@ -6,7 +6,8 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class MovieEntity(
     val title: String,
-    val cover: String?,
+    val cover: String,
+    val coverHeight: Int,
     val videoUrl: String?,
     val synopsis: String?,
     val releaseDate: String?,

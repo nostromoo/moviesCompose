@@ -1,6 +1,5 @@
 package com.example.moviescompose.details
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -13,10 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -24,10 +20,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -39,12 +37,10 @@ import com.example.moviescompose.domain.model.MovieEntity
 @Composable
 fun DetailsScreen(movieEntity: MovieEntity?) {
 
-    val isPreviewVisible = remember { mutableStateOf(true) }
-
     Column {
-        VideoView(isPreviewVisible, movieEntity)
+        VideoView(movieEntity)
         Column(
-            modifier = Modifier.padding(horizontal = 12.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             movieEntity?.title?.let {
@@ -86,11 +82,13 @@ fun DetailsScreen(movieEntity: MovieEntity?) {
 
 @Composable
 private fun VideoView(
-    isPreviewVisible: MutableState<Boolean>,
     movieEntity: MovieEntity?
 ) {
+    val viewModel: DetailsViewModel = hiltViewModel()
+    val isPreviewVisible by viewModel.isPreviewVisible.collectAsStateWithLifecycle()
+
     Surface {
-        if (isPreviewVisible.value) {
+        if (isPreviewVisible) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(movieEntity?.cover)
@@ -107,7 +105,7 @@ private fun VideoView(
         }
         movieEntity?.videoUrl?.let {
             ExoPlayerView(it) { isVisible ->
-                isPreviewVisible.value = isVisible
+                viewModel.update(isVisible)
             }
         }
     }
@@ -147,7 +145,7 @@ fun ExoPlayerView(videoUrl: String, onUpdate: (Boolean) -> Unit) {
         },
         modifier = Modifier
             .aspectRatio(1.5f, true)
-            .height(300.dp)
+            .height(200.dp)
             .fillMaxWidth(),
         update = {
             onUpdate(false)
