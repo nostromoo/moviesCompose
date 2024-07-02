@@ -1,6 +1,5 @@
 package com.example.moviescompose.di
 
-import com.example.moviescompose.BuildConfig
 import com.example.moviescompose.data.repository.MovieRepository
 import com.example.moviescompose.data.repository.MovieRepositoryImpl
 import com.example.moviescompose.data.service.MoviesApi
@@ -24,19 +23,15 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideOkHttpClient(handshakeCertificates: HandshakeCertificates) = if (BuildConfig.DEBUG) {
+    fun provideOkHttpClient(handshakeCertificates: HandshakeCertificates): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-        OkHttpClient.Builder()
+        return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .sslSocketFactory(
                 handshakeCertificates.sslSocketFactory(),
                 handshakeCertificates.trustManager
             )
-            .build()
-    } else {
-        OkHttpClient
-            .Builder()
             .build()
     }
 

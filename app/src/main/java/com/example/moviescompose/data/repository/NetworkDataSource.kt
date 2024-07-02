@@ -1,9 +1,9 @@
 package com.example.moviescompose.data.repository
 
+import com.example.moviescompose.data.model.MovieResponse
 import com.example.moviescompose.data.service.MoviesApi
 import com.example.moviescompose.di.Dispatcher
 import com.example.moviescompose.di.MoviesDispatchers
-import com.example.moviescompose.data.model.MovieResponse
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.Response
@@ -14,7 +14,7 @@ class NetworkDataSource @Inject constructor(
     private val movieApi: MoviesApi
 ) {
 
-    suspend fun getMovies(): Response<List<MovieResponse>> =
+    suspend fun getMovies(): Response<MovieResponse> =
         withContext(ioDispatcher) {
             movieApi.fetchMovies()
         }

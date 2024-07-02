@@ -1,23 +1,38 @@
 package com.example.moviescompose.data.repository
 
+import com.example.moviescompose.data.model.MovieResponse
 import com.example.moviescompose.data.model.toEntityList
-import com.example.moviescompose.di.Dispatcher
-import com.example.moviescompose.di.MoviesDispatchers
-import com.example.moviescompose.domain.model.Movie
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import com.example.moviescompose.domain.model.MovieEntity
+import com.example.moviescompose.utils.NetworkResult
+import com.example.moviescompose.utils.safeApiCall
 import javax.inject.Inject
 
-class MovieRepositoryImpl @Inject constructor(
-    @Dispatcher(MoviesDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
-    private val dataSource: NetworkDataSource
-) : MovieRepository, BaseRepository() {
+sealed class MoviesState {
+    object START : MoviesState()
+    data class SUCCESS(val movieEntities: List<MovieEntity>) : MoviesState()
+    object ERROR : MoviesState()
+}
 
-    override fun getMovies(): Flow<List<Movie>> = flow {
-        emit(
-            dataSource.getMovies().body()?.map { it.toEntityList() } ?: emptyList()
-        )
-    }.flowOn(ioDispatcher)
+class MovieRepositoryImpl @Inject constructor(
+    private val dataSource: NetworkDataSource
+) : MovieRepository {
+
+    override suspend fun getMovies(): MoviesState {
+
+        val response = safeApiCall {
+            dataSource.getMovies()
+        }
+
+
+        return when (response) {
+            is NetworkResult.Failure -> {
+                MoviesState.ERROR
+            }
+
+            is NetworkResult.Success<MovieResponse> -> {
+                MoviesState.SUCCESS(response.value?.feed?.entry?.map { it.toEntityList() }
+                    ?: emptyList())
+            }
+        }
+    }
 }
